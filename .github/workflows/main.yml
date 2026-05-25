@@ -21,7 +21,7 @@ jobs:
   save-file:
     name: "📥 Download File"
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 1200
     permissions:
       contents: write
 
