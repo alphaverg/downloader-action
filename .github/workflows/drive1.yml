@@ -1,7 +1,7 @@
 name: Upload Zips to Google Drive
 
 on:
-  workflow_dispatch: # برای اینکه بتوانید دستی دکمه اجرا را بزنید
+  workflow_dispatch:
 
 jobs:
   upload:
@@ -11,11 +11,52 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Upload Zip Files to Google Drive
-      uses: adityassk/upload-to-google-drive@v2
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        target-folder: ${{ secrets.GDRIVE_FOLDER_ID }}
-        pattern: "*.zip" # انتقال تمام فایل‌هایی که پسوند زیپ دارند
+        python-node-version: '3.10'
+
+    - name: Install Google API Client
+      run: pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
+
+    - name: Run Upload Script
       env:
-        GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        GDRIVE_TOKEN: ${{ secrets.GDRIVE_TOKEN }}
+      run: |
+        python - <<EOF
+        import os
+        import glob
+        from googleapiclient.discovery import build
+        from googleapiclient.http import MediaFileUpload
+        from google.oauth2.credentials import Credentials
+
+        # تنظیم دسترسی به گوگل درایو
+        token = os.environ.get('GDRIVE_TOKEN')
+        folder_id = os.environ.get('GDRIVE_FOLDER_ID')
+        
+        creds = Credentials(token=token)
+        drive_service = build('drive', 'v3', credentials=creds)
+
+        # پیدا کردن تمام فایل‌های زیپ در مسیر دقیق شما
+        search_path = "downloads/archive_20260524_190954_2/*.zip"
+        files = glob.glob(search_path)
+        
+        print(f"Found {len(files)} zip files to upload.")
+
+        for file_path in files:
+            file_name = os.path.basename(file_path)
+            print(f"Uploading {file_name}...")
+            
+            file_metadata = {
+                'name': file_name,
+                'parents': [folder_id]
+            }
+            media = MediaFileUpload(file_path, mimetype='application/zip', resumable=True)
+            
+            try:
+                file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+                print(f"Successfully uploaded {file_name} (ID: {file.get('id')})")
+            except Exception as e:
+                print(f"Error uploading {file_name}: {str(e)}")
+        EOF
