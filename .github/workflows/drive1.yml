@@ -1,4 +1,4 @@
-name: Upload Zips to Google Drive
+name: Upload Files to Google Drive
 
 on:
   workflow_dispatch:
@@ -35,6 +35,38 @@ jobs:
         folder_id = os.environ.get('GDRIVE_FOLDER_ID')
         
         creds = Credentials(token=token)
+        drive_service = build('drive', 'v3', credentials=creds)
+
+        # تغییر مهم: حالا تمام فایل‌های داخل پوشه (با هر پسوندی) انتخاب می‌شوند
+        search_path = "downloads/archive_20260524_190954_2/*"
+        all_items = glob.glob(search_path)
+        
+        # فیلتر کردن برای حذف پوشه‌های احتمالی و انتخاب فقط "فایل‌ها"
+        files = [f for f in all_items if os.path.isfile(f)]
+
+        if not files:
+            print("ERROR: No files found in the specified path!")
+            exit(1)
+
+        print(f"Found {len(files)} files to upload.")
+
+        for file_path in files:
+            file_name = os.path.basename(file_path)
+            print(f"Uploading {file_name}...")
+            
+            file_metadata = {
+                'name': file_name,
+                'parents': [folder_id]
+            }
+            # فرمت به صورت عمومی تنظیم شده تا هر نوع فایلی پشتیبانی شود
+            media = MediaFileUpload(file_path, mimetype='application/octet-stream', resumable=True)
+            
+            try:
+                file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+                print(f"Successfully uploaded {file_name}")
+            except Exception as e:
+                print(f"Error uploading {file_name}: {str(e)}")
+        EOF        creds = Credentials(token=token)
         drive_service = build('drive', 'v3', credentials=creds)
 
         # پیدا کردن مسیر
