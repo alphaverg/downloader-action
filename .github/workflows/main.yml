@@ -58,7 +58,7 @@ jobs:
         run: |
           URLS="${{ github.event.inputs.urls }}"
           ZIP_PASSWORD="${{ github.event.inputs.password }}"
-          SPLIT_MB=95
+          SPLIT_MB=48
           REPO_OWNER="${{ github.repository_owner }}"
           REPO_NAME="${{ github.event.repository.name }}"
           BRANCH="${GITHUB_REF_NAME}"
