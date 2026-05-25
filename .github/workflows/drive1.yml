@@ -1,0 +1,21 @@
+name: Upload Zips to Google Drive
+
+on:
+  workflow_dispatch: # برای اینکه بتوانید دستی دکمه اجرا را بزنید
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Upload Zip Files to Google Drive
+      uses: adityassk/upload-to-google-drive@v2
+      with:
+        target-folder: ${{ secrets.GDRIVE_FOLDER_ID }}
+        pattern: "*.zip" # انتقال تمام فایل‌هایی که پسوند زیپ دارند
+      env:
+        GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
