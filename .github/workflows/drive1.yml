@@ -1,4 +1,4 @@
-name: Upload Files to Google Drive
+name: Direct Upload Links to Google Drive
 
 on:
   workflow_dispatch:
@@ -8,115 +8,128 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
     - name: Install Google API Client
-      run: pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
+      run: pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib requests
 
-    - name: Run Upload Script
+    - name: Run Direct Download and Upload
       env:
         GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
         GDRIVE_TOKEN: ${{ secrets.GDRIVE_TOKEN }}
       run: |
-        python - <<EOF
+        python - << 'EOF'
         import os
-        import glob
+        import requests
         from googleapiclient.discovery import build
         from googleapiclient.http import MediaFileUpload
         from google.oauth2.credentials import Credentials
 
+        # ۱. تنظیمات اولیه اتصال به درایو
         token = os.environ.get('GDRIVE_TOKEN')
         folder_id = os.environ.get('GDRIVE_FOLDER_ID')
-        
         creds = Credentials(token=token)
         drive_service = build('drive', 'v3', credentials=creds)
 
-        # تغییر مهم: حالا تمام فایل‌های داخل پوشه (با هر پسوندی) انتخاب می‌شوند
-        search_path = "downloads/archive_20260524_190954_2/*"
-        all_items = glob.glob(search_path)
-        
-        # فیلتر کردن برای حذف پوشه‌های احتمالی و انتخاب فقط "فایل‌ها"
-        files = [f for f in all_items if os.path.isfile(f)]
+        # ۲. لیست دقیق ۶۵ لینک شما
+        urls = [
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z01",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z02",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z03",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z04",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z05",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z06",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z07",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z08",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z09",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z10",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z11",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z12",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z13",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z14",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z15",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z16",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z17",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z18",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z19",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z20",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z21",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z22",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z23",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z24",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z25",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z26",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z27",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z28",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z29",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z30",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z31",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z32",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z33",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z34",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z35",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z36",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z37",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z38",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z39",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z40",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z41",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z42",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z43",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z44",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z45",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z46",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z47",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z48",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z49",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z50",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z51",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z52",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z53",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z54",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z55",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z56",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z57",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z58",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z59",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z60",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z61",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z62",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z63",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.z64",
+            "https://github.com/alphaverg/downloader-action/raw/master/downloads/archive_20260524_190954_2/archive_20260524_190954.zip"
+        ]
 
-        if not files:
-            print("ERROR: No files found in the specified path!")
-            exit(1)
+        print(f"Starting migration of {len(urls)} files...")
 
-        print(f"Found {len(files)} files to upload.")
+        # ۳. حلقه دانلود و آپلود مستقیم بدون ذخیره دائم در دیسک گیت‌هاب
+        for index, url in enumerate(urls, start=1):
+            file_name = url.split('/')[-1]
+            print(f"[{index}/{len(urls)}] Migrating {file_name}...")
 
-        for file_path in files:
-            file_name = os.path.basename(file_path)
-            print(f"Uploading {file_name}...")
-            
-            file_metadata = {
-                'name': file_name,
-                'parents': [folder_id]
-            }
-            # فرمت به صورت عمومی تنظیم شده تا هر نوع فایلی پشتیبانی شود
-            media = MediaFileUpload(file_path, mimetype='application/octet-stream', resumable=True)
-            
             try:
-                file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-                print(f"Successfully uploaded {file_name}")
+                # دانلود استریم فایل از گیت‌هاب
+                response = requests.get(url, stream=True)
+                if response.status_code == 200:
+                    # ذخیره موقت در حافظه سرور برای آپلود یکباره
+                    with open(file_name, 'wb') as f:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                    
+                    # آپلود یکپارچه به درایو
+                    file_metadata = {'name': file_name, 'parents': [folder_id]}
+                    media = MediaFileUpload(file_name, mimetype='application/octet-stream', resumable=True)
+                    drive_service.files().create(body=file_metadata, media_body=media).execute()
+                    
+                    print(f"Successfully moved {file_name}")
+                    os.remove(file_name) # پاک کردن فایل موقت برای پر نشدن هارد سرور
+                else:
+                    print(f"Failed to download {file_name}, Status: {response.status_code}")
             except Exception as e:
-                print(f"Error uploading {file_name}: {str(e)}")
-        EOF        creds = Credentials(token=token)
-        drive_service = build('drive', 'v3', credentials=creds)
+                print(f"Error migrating {file_name}: {str(e)}")
 
-        # پیدا کردن مسیر
-        search_path = "downloads/archive_20260524_190954_2/*.zip"
-        files = glob.glob(search_path)
-        
-        print(f"=== Debug Info ===")
-        print(f"Current directory structure: {os.listdir('.')}")
-        if os.path.exists("downloads"):
-            print(f"Inside downloads: {os.listdir('downloads')}")
-        print(f"==================")
-
-        if not files:
-            print("ERROR: No zip files found in the specified path!")
-            exit(1)
-
-        print(f"Found {len(files)} zip files to upload.")
-
-        for file_path in files:
-            file_name = os.path.basename(file_path)
-            file_metadata = {'name': file_name, 'parents': [folder_id]}
-            media = MediaFileUpload(file_path, mimetype='application/zip', resumable=True)
-            try:
-                file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-                print(f"Successfully uploaded {file_name}")
-            except Exception as e:
-                print(f"Error uploading {file_name}: {str(e)}")
-        EOF        
-        creds = Credentials(token=token)
-        drive_service = build('drive', 'v3', credentials=creds)
-
-        # پیدا کردن تمام فایل‌های زیپ در مسیر دقیق شما
-        search_path = "downloads/archive_20260524_190954_2/*.zip"
-        files = glob.glob(search_path)
-        
-        print(f"Found {len(files)} zip files to upload.")
-
-        for file_path in files:
-            file_name = os.path.basename(file_path)
-            print(f"Uploading {file_name}...")
-            
-            file_metadata = {
-                'name': file_name,
-                'parents': [folder_id]
-            }
-            media = MediaFileUpload(file_path, mimetype='application/zip', resumable=True)
-            
-            try:
-                file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-                print(f"Successfully uploaded {file_name} (ID: {file.get('id')})")
-            except Exception as e:
-                print(f"Error uploading {file_name}: {str(e)}")
+        print("All files processed!")
         EOF
